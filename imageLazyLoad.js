@@ -74,10 +74,16 @@ ImageLazyLoad.prototype = {
   },
   observer: null,
   // onImageLoad: function ( target ) {},
+  _load_: function ( event ) {
+    event = event || window.event;
+    var target = event.target || event.srcElement;
+    target._ins_._load( target );
+    target._ins_ = void 0;
+  },
   _load: function ( target ) {
     target.style.transition = 'opacity 0.185s ease-in';
     target.style.opacity = '1';
-    target.removeEventListener( 'load', this._load );
+    target.removeEventListener( 'load', this._load_ );
     this.onImageLoad && this.onImageLoad( target );
   },
   loadImages: function ( images ) {
@@ -92,10 +98,8 @@ ImageLazyLoad.prototype = {
     target.style.opacity = '0';
     if ( src ) target.src = src;
     if ( srcset ) target.srcset = srcset;
-    var _this = this;
-    target.addEventListener( 'load', function () {
-      _this._load( target );
-    } );
+    target._ins_ = this;
+    target.addEventListener( 'load', this._load_ );
     this.observer.unobserve( target );
     return this;
   },
